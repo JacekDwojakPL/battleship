@@ -88,12 +88,12 @@ function render_game_cell(i, j, class_type) {
 };
 
 function render_game_board(game_div, class_type) {
-  for(var i = 0; i < 10; i++) {
+  for(var i = 1; i <= 10; i++) {
 
     var game_row = render_game_row(i);
     game_div.appendChild(game_row);
 
-    for(var j = 0; j < 10; j++) {
+    for(var j = 1; j <= 10; j++) {
 
       var game_cell = render_game_cell(i, j, class_type);
       game_row.appendChild(game_cell);
@@ -159,16 +159,16 @@ function add_ship(radio_button, ships_global, game_cell, game_board) {
 
 function create_game_board() {
   var arr = [];
-  for(var i = 0; i < 10; i++) {
+  for(var i = 0; i < 12; i++) {
     arr[i] = [];
-    for(var j = 0; j < 10; j++) {
+    for(var j = 0; j < 12; j++) {
       var arr2 = []
       arr[i].push(arr2);
     }
   }
 
-  for(var i = 0; i < 10; i++) {
-    for(var j = 0; j < 10; j++) {
+  for(var i = 0; i < 12; i++) {
+    for(var j = 0; j < 12; j++) {
       arr[i][j] = true;
     }
   }
@@ -198,6 +198,7 @@ class Ship {
           return false;
       };
     };
+
     return true;
   };
   save_coords(x, y) {
@@ -219,6 +220,10 @@ class Ship {
                 break;
           };
         };
+
+        if(this.is_created() == true) {
+          this.prevent_touch(game_board);
+        };
       };
     }; // end of save coords
 
@@ -234,11 +239,9 @@ class Ship {
     }
 
     prevent_touch(game_board) {
-      for(var i = 0; i < this.coords.size; i++) {
+      for(var i = 0; i < this.coords.length; i++) {
         var x = this.coords[i].coord_1;
         var y = this.coords[i].coord_2;
-        console.log(x);
-        console.log(y);
         game_board[parseInt(x)][parseInt(y)-1] = false;
         game_board[parseInt(x)][parseInt(y)+1] = false;
         game_board[parseInt(x)-1][parseInt(y)] = false;
@@ -247,9 +250,11 @@ class Ship {
         game_board[parseInt(x)+1][parseInt(y)] = false;
         game_board[parseInt(x)+1][parseInt(y)-1] = false;
         game_board[parseInt(x)+1][parseInt(y)+1] = false;
-      }
-    }
+      };
+
+    };
 };
+
 
 
 function draw_oponent(game_board) {
