@@ -23,11 +23,16 @@
         <div class="col-lg-6 col-12 game_div1 mt-3 mb-3"></div>
         <div class="col-lg-6 col-12 game_div2 mt-3 mb-3"></div>
       </div>
+      <div class="row">
+        <ul class="user_list">
+        </ul>
+      </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}" type="text/javascript"></script>
     {{ JSGlue.include() }}
   </body>

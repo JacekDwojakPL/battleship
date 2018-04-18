@@ -22,6 +22,8 @@ var ships_global = {
       }
   };
 
+var socket = io.connect('http://' + document.domain + ':' + location.port);
+
 document.addEventListener('DOMContentLoaded', () => {
   var game_div1 = document.querySelector('.game_div1');
   var game_div2 = document.querySelector('.game_div2');
@@ -30,6 +32,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   var player_board = render_game_board(game_div1, player_class);
   var opponent_board = render_game_board(game_div2, opponent_class);
+
+  socket.on('my_response', function (response) {
+    var user_list = document.querySelector('.user_list');
+    var li_element = document.createElement('li');
+    li_element.innerHTML = 'user number ' + response.user_number + ' connected!';
+    user_list.append(li_element);
+  });
+  socket.on('shoot_response', function(data) {
+    var player_cells = document.querySelectorAll('.player');
+    player_cells.forEach(function(cell) {
+      if(cell.dataset.x == data['data']['x'] && cell.dataset.y == data['data']['y']) {
+        cell.style.color = 'red';
+      }
+    })
+  }); // end of shoot response
+
 
 });
 
@@ -47,42 +65,39 @@ function render_game_cell(i, j, class_type) {
   game_cell.setAttribute('data-y', j);
   game_cell.innerHTML="0";
 
-  if(game_cell.classList.contains('player')) {
-
-
-    game_cell.addEventListener('mouseover', function() {
+  game_cell.addEventListener('mouseover', function() {
       this.setAttribute('style', 'background-color: red;');
     });
 
-    game_cell.addEventListener('mouseout', function() {
+  game_cell.addEventListener('mouseout', function() {
       this.setAttribute('style', 'background-color: none;');
     });
-  };
+
 
   //handle click event, send coordination data to server
   game_cell.addEventListener('click', function() {
     if(this.classList.contains('player')) {
 
       var radio_button = document.querySelector('input[name=ship_type]:checked');
-      var params = "?x=" + this.dataset.x + "&y=" + this.dataset.y;
-      var request = new XMLHttpRequest();
-      request.open('GET', Flask.url_for('coords')+params, true);
 
-      // handle respons event
-      request.onload = () => {
-        var response = JSON.parse(request.responseText);
-        if(is_legal(this, game_board) == true) { add_ship(radio_button, ships_global, this, game_board); draw_oponent(game_board); }
-        else {
-          document.querySelector(".info_span").classList.remove("bg-success");
-          document.querySelector(".info_span").classList.add("bg-danger");
-          document.querySelector(".info_span").innerHTML = 'Nie mozesz dodac statku w tym miejscu!';
-        }
-      }; // end of onload handler
-
-      request.send();
-      // radio buttons
+      if(is_legal(this, game_board) == true) {
+        add_ship(radio_button, ships_global, this, game_board);
+      }
+      else {
+        document.querySelector(".info_span").classList.remove("bg-success");
+        document.querySelector(".info_span").classList.add("bg-danger");
+        document.querySelector(".info_span").innerHTML = 'Nie mozesz dodac statku w tym miejscu!';
+      }
     };
-  })
+
+    if(this.classList.contains('opponent')) {
+      this.classList.add('clicked');
+      coords = {x: this.dataset.x,
+                y: this.dataset.y}
+      socket.emit('shoot_event', coords);
+    };
+
+  }) // end of click event
 
   return game_cell;
 };
@@ -146,6 +161,7 @@ function add_ship(radio_button, ships_global, game_cell, game_board) {
   }
   else {
           if(last_ship.check_coords(game_cell.dataset.x, game_cell.dataset.y) == true) {
+
               last_ship.save_coords(game_cell.dataset.x, game_cell.dataset.y);
               last_ship.last_coord_index++;
               game_board[game_cell.dataset.x][game_cell.dataset.y] = false;
@@ -254,21 +270,3 @@ class Ship {
 
     };
 };
-
-
-
-function draw_oponent(game_board) {
-  var cells = document.querySelectorAll(".opponent");
-  cells.forEach(function(cell) {
-
-      if(game_board[cell.dataset.x][cell.dataset.y] == false) {
-      cell.setAttribute('style', 'color: red');
-      cell.innerHTML = "F";
-     }
-     else {
-      cell.setAttribute('style', 'color: blue');
-      cell.innerHTML = "T";
-      }
-    });
-
-  };
