@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=devive-width, initial-scale=1.0">
     <meta http-equiv="U-XA-Compatible" content="IE-Edge">
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
-    <title>Battleships</title>
+    <title>Battleships: {{room}}</title>
   </head>
   <body>
     <div class="container text-center bg-primary">
-      <h1>Battleships!</h1>
+      <h1 data-room="{{room}}">Battleships!</h1>
       <ul class="list-inline mt-3 mb-3 pt-3 pb-3">
         <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="1" class="ship_type ml-3" checked="checked">Jeden<span class="inner_span1 ml-2">0</span>/4</li>
         <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="2" class="ship_type ml-3">Dwa<span class="inner_span2 ml-2">0</span>/3</li>

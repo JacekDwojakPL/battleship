@@ -23,31 +23,28 @@ var ships_global = {
   };
 
 var socket = io.connect('http://' + document.domain + ':' + location.port);
+var room = document.querySelector('h1').dataset.room;
 
 document.addEventListener('DOMContentLoaded', () => {
   var game_div1 = document.querySelector('.game_div1');
   var game_div2 = document.querySelector('.game_div2');
+
   var player_class = "player";
   var opponent_class = "opponent";
 
   var player_board = render_game_board(game_div1, player_class);
   var opponent_board = render_game_board(game_div2, opponent_class);
 
-  socket.on('my_response', function (response) {
-    var user_list = document.querySelector('.user_list');
-    var li_element = document.createElement('li');
-    li_element.innerHTML = 'user number ' + response.user_number + ' connected!';
-    user_list.append(li_element);
-  });
+  socket.emit('join_request', room);
   socket.on('shoot_response', function(data) {
-    var player_cells = document.querySelectorAll('.player');
-    player_cells.forEach(function(cell) {
+    console.log(data['data']['x'])
+    var cells = document.querySelectorAll(".player");
+    cells.forEach(function(cell) {
       if(cell.dataset.x == data['data']['x'] && cell.dataset.y == data['data']['y']) {
         cell.style.color = 'red';
       }
     })
-  }); // end of shoot response
-
+  })
 
 });
 
@@ -93,7 +90,8 @@ function render_game_cell(i, j, class_type) {
     if(this.classList.contains('opponent')) {
       this.classList.add('clicked');
       coords = {x: this.dataset.x,
-                y: this.dataset.y}
+                y: this.dataset.y,
+                room: room}
       socket.emit('shoot_event', coords);
     };
 
