@@ -37,15 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   socket.emit('join_request', room);
   socket.on('shoot_response', function(data) {
-    console.log(data['data']['x'])
     var cells = document.querySelectorAll(".player");
     cells.forEach(function(cell) {
       if(cell.dataset.x == data['data']['x'] && cell.dataset.y == data['data']['y']) {
         cell.style.color = 'red';
       }
-    })
-  })
-
+    });
+  });
 });
 
 function render_game_row(i) {
