@@ -4,64 +4,64 @@ from flask import Flask, render_template, request, url_for, jsonify, session, re
 from flask_jsglue import JSGlue
 from flask_socketio import SocketIO, emit, send, join_room, leave_room
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import scoped_session, sessionmaker
+#from sqlalchemy import create_engine
+#from sqlalchemy.orm import scoped_session, sessionmaker
+
+from models import *
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 database = 'sqlite:///' + os.path.join(basedir, 'data.db')
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = database
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'super_secret_key!'
+db.init_app(app)
 JSGlue(app)
 socketio = SocketIO(app)
 
-engine = create_engine(database)
-db = scoped_session(sessionmaker(bind=engine))
-
-user_number = 0
+room_number = 1
 
 @app.route("/")
 def main():
-    rooms = db.execute("SELECT * FROM rooms").fetchall()
-    return render_template("fake_rooms.html", rooms=rooms)
+    rooms = Rooms.query.all()
+    print(rooms)
+    return render_template("rooms.html", rooms=rooms)
 
 @app.route("/create_room", methods=['POST'])
 def create_room():
-    db.execute("INSERT INTO rooms (name, connected_users) VALUES (:room, :connected_users)", {"room": request.form.get("room_name"), "connected_users": 0})
-    db.commit()
-    return redirect(url_for('game', room=request.form.get('room_name')))
+    new_room = Rooms(name=request.form.get("room_name"), players_count=0)
+    db.session.add(new_room)
+    db.session.commit()
+    return jsonify({"name": request.form.get("room_name")})
 
-@app.route("/game/<room>")
+@app.route("/game/<room>", methods=['POST'])
 def game(room):
-    connected_users = db.execute("SELECT connected_users FROM rooms WHERE name = :room", {"room": room}).fetchone()
-    print(connected_users)
-    if int(connected_users[0]) < 2:
-        return render_template("index.html", room=room)
-    else:
-        return jsonify({"message": "this room is full!"})
+    return render_template("index.html", room=room, name=request.form.get("player_name"))
 
-@socketio.on('connect')
-def test_connect():
-    global user_number
-    user_number = user_number + 1
 
 @socketio.on('disconnect')
-def test_disconnect():
+def disconnect_request():
 
-    room = db.execute("SELECT room_name FROM users WHERE user_id = :user_id", {"user_id": request.sid}).fetchone()
-    db.execute("UPDATE rooms SET connected_users = connected_users - 1 WHERE name = :room", {"room": room[0]})
-    connected_users =  db.execute("SELECT connected_users FROM rooms WHERE name = :room", {"room": room[0]}).fetchone()
-    if int(connected_users[0]) == 0:
-        db.execute("DELETE FROM rooms WHERE name = :name", {"name": room[0]})
-    db.execute("DELETE FROM users WHERE user_id = :user_id", {"user_id": request.sid})
+    user = Users.query.filter_by(sid=request.sid).first()
+    room = Rooms.query.get(user.room_id)
+    print(room.name)
+    room.players_count -= 1
+    db.session.add(room)
+    db.session.delete(user)
+    db.session.commit()
 
 @socketio.on('join_request')
 def join_request(room):
+
     join_room(room)
-    db.execute("INSERT INTO users (user_id, room_name) VALUES (:user_id, :room_name)", {"user_id": request.sid, "room_name": room});
-    db.execute("UPDATE rooms SET connected_users = connected_users + 1 WHERE name = :room", {"room": room})
-    db.commit()
-    print(f"user {request.sid} requested to join {room}")
+    room = Rooms.query.filter_by(name=room).first()
+    new_user = Users(sid=request.sid, room_id=room.id)
+    room.players_count += 1
+    db.session.add(new_user)
+    db.session.add(room)
+    db.session.commit()
+    print(f"user {request.sid} requested to join {room.name}")
 
 
 @socketio.on('shoot_event')

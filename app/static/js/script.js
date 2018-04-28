@@ -24,6 +24,7 @@ var ships_global = {
 
 var socket = io.connect('http://' + document.domain + ':' + location.port);
 var room = document.querySelector('h1').dataset.room;
+var name = document.querySelector('h1').dataset.name;
 
 document.addEventListener('DOMContentLoaded', () => {
   var game_div1 = document.querySelector('.game_div1');

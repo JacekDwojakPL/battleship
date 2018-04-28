@@ -8,23 +8,30 @@
     <title>Battleships</title>
   </head>
   <body>
-    <div>
+    <div class="container">
+      <h1>Select room</h1>
+        <ul class="room_list">
       {% if rooms %}
-      <ul>
         {% for room in rooms %}
-        <li><a href="{{ url_for('game', room=room.name) }}" class="room_link" data-name="{{room.name}}">{{room.name}}</a></li>
+        <li>
+          <form action="{{ url_for('game', room=room.name) }}" method="POST">
+            <a href="">{{room.name}}</a>
+            <input type="text" name="player_name" placeholder="Player name" required>
+            <button class="btn btn-primary" type="submit">Enter</button>
+          </form>
+        </li>
         {% endfor %}
-      </ul>
       {% endif %}
-      <form action="{{ url_for('create_room') }}" method="POST">
-        <input type="text" name="room_name" placeholder="room name" required>
-        <button type="submit" class="btn btn-primary">Create room</button>
-      </form>
+      </ul>
+
+      <h1>New room</h1>
+      <input type="text" name="new_room_name" placeholder="room name" required>
+      <button type="submit" class="btn btn-primary" id="room_button">Create room</button>
     </div>
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/rooms.js') }}" type="text/javascript"></script>
     {{ JSGlue.include() }}
   </body>
 </html>
