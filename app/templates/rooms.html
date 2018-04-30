@@ -10,14 +10,19 @@
   <body>
     <div class="container">
       <h1>Select room</h1>
-        <ul class="room_list">
+        <ul class="list-unstyled room_list">
       {% if rooms %}
         {% for room in rooms %}
-        <li>
+        <li class="pt-3 pb-3">
           <form action="{{ url_for('game', room=room.name) }}" method="POST">
             <a href="">{{room.name}}</a>
+            <span class="players_count">Players: {{room.players_count}}/2</span>
+            {% if room.full %}
+            <span class="room_info bg-danger">Room is full!</span>
+            {% else %}
             <input type="text" name="player_name" placeholder="Player name" required>
             <button class="btn btn-primary" type="submit">Enter</button>
+            {% endif %}
           </form>
         </li>
         {% endfor %}
