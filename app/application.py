@@ -70,3 +70,9 @@ def shoot(message):
     print(message)
     room = message['room']
     emit('shoot_response', {'data': message}, broadcast=True, include_self=False, room=room)
+
+@socketio.on('chat_event')
+def chat(message):
+    print(message)
+    room = message['room']
+    emit('chat_response', {'data': message}, broadcast=True, room=room)

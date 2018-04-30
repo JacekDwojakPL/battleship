@@ -29,6 +29,7 @@ var name = document.querySelector('h1').dataset.name;
 document.addEventListener('DOMContentLoaded', () => {
   var game_div1 = document.querySelector('.game_div1');
   var game_div2 = document.querySelector('.game_div2');
+  var chat_button = document.querySelector('.chat_button');
 
   var player_class = "player";
   var opponent_class = "opponent";
@@ -36,7 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
   var player_board = render_game_board(game_div1, player_class);
   var opponent_board = render_game_board(game_div2, opponent_class);
 
+  // handle websocket events and responses
+
   socket.emit('join_request', room);
+
   socket.on('shoot_response', function(data) {
     var cells = document.querySelectorAll(".player");
     cells.forEach(function(cell) {
@@ -44,7 +48,26 @@ document.addEventListener('DOMContentLoaded', () => {
         cell.style.color = 'red';
       }
     });
-  });
+  }); // end of shoot response
+
+  // handle send and recive chat Message
+  chat_button.addEventListener('click', function() {
+    var data_to_send = { message: document.querySelector('.chat_input').value,
+                    name: name,
+                    room, room
+                  };
+    console.log(data_to_send);
+
+    socket.emit('chat_event', data_to_send);
+  }); //end of click event
+
+  socket.on('chat_response', function(data) {
+    var chat_list = document.querySelector('.chat_list');
+    var new_message = document.createElement('li');
+    new_message.innerHTML = data['data']['name'] + ': ' + data['data']['message']
+    chat_list.prepend(new_message);
+    document.querySelector('.chat_input').value = "";
+  })
 });
 
 function render_game_row(i) {
