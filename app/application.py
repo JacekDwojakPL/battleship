@@ -76,3 +76,8 @@ def chat(message):
     print(message)
     room = message['room']
     emit('chat_response', {'data': message}, broadcast=True, room=room)
+
+@socketio.on('hit_event')
+def hit(message):
+    print(message)
+    emit('hit_response', {'data': message}, broadcast=True, include_self=False, room=message['room'])

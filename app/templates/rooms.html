@@ -8,20 +8,26 @@
     <title>Battleships</title>
   </head>
   <body>
+    <div class="container text-center">
+      <h1 class="mt-5">WELCOME TO BATTLESHIPS!</h1>
+      <p class="mt-3 mb-3 pt-5 pb-5">Please choose room from below or create new one!</p>
+    </div>
     <div class="container">
-      <h1>Select room</h1>
-        <ul class="list-unstyled room_list">
+      <h2>Select room</h2>
+      <ul class="list-unstyled room_list">
       {% if rooms %}
         {% for room in rooms %}
-        <li class="pt-3 pb-3">
+        <li class="pt-3 pb-3 list-item">
           <form action="{{ url_for('game', room=room.name) }}" method="POST">
-            <a href="">{{room.name}}</a>
-            <span class="players_count">Players: {{room.players_count}}/2</span>
+            <a href="#{{room.name}}" class="ml-4">{{room.name}}</a>
+            <span class="players_count ml-4">Players: {{room.players_count}}/2</span>
             {% if room.full %}
             <span class="room_info bg-danger">Room is full!</span>
             {% else %}
-            <input type="text" name="player_name" placeholder="Player name" required>
-            <button class="btn btn-primary" type="submit">Enter</button>
+            <div class="room_list_input" id="{{room.name}}">
+              <input type="text" name="player_name" placeholder="Player name" class="ml-4" required>
+              <button class="btn btn-primary" type="submit">Enter</button>
+            </div>
             {% endif %}
           </form>
         </li>
@@ -29,7 +35,7 @@
       {% endif %}
       </ul>
 
-      <h1>New room</h1>
+      <h2>New room</h2>
       <input type="text" name="new_room_name" placeholder="room name" required>
       <button type="submit" class="btn btn-primary" id="room_button">Create room</button>
     </div>

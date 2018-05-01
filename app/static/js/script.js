@@ -42,13 +42,30 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.emit('join_request', room);
 
   socket.on('shoot_response', function(data) {
+    var coords = {
+                  x: data['data']['x'],
+                  y: data['data']['y']
+                };
+    hit_ship(coords, ships_global, room);
+
     var cells = document.querySelectorAll(".player");
     cells.forEach(function(cell) {
-      if(cell.dataset.x == data['data']['x'] && cell.dataset.y == data['data']['y']) {
+      if(cell.dataset.x == coords.x && cell.dataset.y == coords.y) {
         cell.style.color = 'red';
       }
     });
   }); // end of shoot response
+
+  socket.on('hit_response', function(data) {
+    console.log(data);
+    var cells = document.querySelectorAll('.opponent');
+    cells.forEach(function(cell) {
+      if(cell.dataset.x == data['data']['x'] && cell.dataset.y == data['data']['y']) {
+        cell.classList.add('hit');
+        cell.innerHTML = data['data']['size'];
+      }
+    })
+  })
 
   // handle send and recive chat Message
   chat_button.addEventListener('click', function() {
@@ -56,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: name,
                     room, room
                   };
-    console.log(data_to_send);
 
     socket.emit('chat_event', data_to_send);
   }); //end of click event
@@ -67,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     new_message.innerHTML = data['data']['name'] + ': ' + data['data']['message']
     chat_list.prepend(new_message);
     document.querySelector('.chat_input').value = "";
-  })
+  });
 });
 
 function render_game_row(i) {
@@ -137,6 +153,26 @@ function render_game_board(game_div, class_type) {
   };
 }
 
+function hit_ship(coords, ships_global, room) {
+
+  var ship_1 = ships_global[1].ships;
+  var ship_2 = ships_global[2].ships;
+  var ship_3 = ships_global[3].ships;
+  var ship_4 = ships_global[4].ships;
+  for(var i = 0; i < ship_1.length; i++) {
+    ship_1[i].hit(coords, room);
+  };
+  for(var i = 0; i < ship_2.length; i++) {
+    ship_2[i].hit(coords, room);
+  };
+  for(var i = 0; i < ship_3.length; i++) {
+    ship_3[i].hit(coords, room);
+  };
+  for(var i = 0; i < ship_4.length; i++) {
+    ship_4[i].hit(coords, room);
+  };
+
+}
 
 function is_legal(game_cell, game_board) {
   if(game_board[game_cell.dataset.x][game_cell.dataset.y] == true) {
@@ -154,7 +190,7 @@ function add_ship(radio_button, ships_global, game_cell, game_board) {
 
   if(last_ship == null || last_ship.is_created() == true) {
 
-      if(ships_obj.ships_quantity >= ships_obj.ships_amount){
+      if(ships_obj.ships_quantity >= ships_obj.ships_amount) {
           document.querySelector(".info_span").classList.remove("bg-success");
           document.querySelector(".info_span").classList.add("bg-danger");
           document.querySelector(".info_span").innerHTML = "juz jest wystarczajaco duzo statkow tego typu!";
@@ -245,7 +281,8 @@ class Ship {
               this.coords[i] = {
                               exist: true,
                               coord_1: x,
-                              coord_2: y
+                              coord_2: y,
+                              hit: false
                             };
                 this.last_coord_upDown = x;
                 this.last_coord_leftRight = y;
@@ -287,6 +324,27 @@ class Ship {
         game_board[parseInt(x)+1][parseInt(y)-1] = false;
         game_board[parseInt(x)+1][parseInt(y)+1] = false;
       };
-
     };
+
+    hit(coords, room) {
+      for(var i = 0; i < this.coords.length; i++) {
+        if(this.coords[i].coord_1 == coords.x && this.coords[i].coord_2 == coords.y) {
+          this.coords[i].hit = true;
+          console.log("trafiony statek o wielkosci " + this.ship_size + " numer: " + this.ship_id)
+          var message = {x: coords.x, y: coords.y, size: this.ship_size, room: room}
+          socket.emit('hit_event', message)
+        }
+      }
+      this.is_sinked();
+    }
+
+    is_sinked() {
+      for(var i = 0; i < this.coords.length; i++) {
+        if(this.coords[i].hit == false) {
+          return false;
+        }
+      }
+      console.log("zatopiony statek o wielkosci " + this.ship_size + " numer: " + this.ship_id)
+      return true;
+    }
 };
