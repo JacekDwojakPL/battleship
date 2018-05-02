@@ -1,16 +1,8 @@
-.room_list li {
-  border-style: solid;
-  border-width: thin;
-  border-bottom: none; }
-  
-.room_list li:hover {
-  background-color: red; }
-
-.room_list_input {
-  display: inline; }
-
-.chat_list li {
-  font-size: 10px; }
+#room_hero {
+  color: #F1ECE9; }
+.room_row {
+  background-color: #A6A5A1;
+  text-transform: uppercase;}
 
 .ship {
   background-color: #8D2F57; }
@@ -57,13 +49,13 @@
   --white: #fff;
   --gray: #6c757d;
   --gray-dark: #343a40;
-  --primary: #95BCA7;
+  --primary: #D7443F;
   --secondary: #6c757d;
   --success: #28a745;
   --info: #17a2b8;
   --warning: #ffc107;
   --danger: #dc3545;
-  --light: #f8f9fa;
+  --light: #A6A5A1;
   --dark: #343a40;
   --breakpoint-xs: 0;
   --breakpoint-sm: 576px;
@@ -79,7 +71,7 @@
   box-sizing: border-box; }
 
 html {
-  font-family: sans-serif;
+  font-family: 'Lato', sans-serif;
   line-height: 1.15;
   -webkit-text-size-adjust: 100%;
   -ms-text-size-adjust: 100%;
@@ -98,9 +90,9 @@ body {
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #212529;
+  color: #333A42;
   text-align: left;
-  background-color: #FCCF4D; }
+  background-color: #F1ECE9; }
 
 [tabindex="-1"]:focus {
   outline: 0 !important; }
@@ -176,12 +168,12 @@ sup {
   top: -.5em; }
 
 a {
-  color: #95BCA7;
+  color: #D7443F;
   text-decoration: none;
   background-color: transparent;
   -webkit-text-decoration-skip: objects; }
   a:hover {
-    color: #669e80;
+    color: #F1ECE9;
     text-decoration: underline; }
 
 a:not([href]):not([tabindex]) {
@@ -1671,13 +1663,13 @@ fieldset:disabled a.btn {
   pointer-events: none; }
 
 .btn-primary {
-  color: #212529;
-  background-color: #95BCA7;
-  border-color: #95BCA7; }
+  color: #F1ECE9;
+  background-color: #D7443F;
+  border-color: #333A42; }
   .btn-primary:hover {
-    color: #212529;
-    background-color: #7ead94;
-    border-color: #76a88d; }
+    color: #333A42;
+    background-color: #F1ECE9;
+    border-color: #D7443F; }
   .btn-primary:focus, .btn-primary.focus {
     box-shadow: 0 0 0 0.2rem rgba(149, 188, 167, 0.5); }
   .btn-primary.disabled, .btn-primary:disabled {
@@ -4136,7 +4128,7 @@ button.close {
   vertical-align: text-top !important; }
 
 .bg-primary {
-  background-color: #95BCA7 !important; }
+  background-color: #D7443F !important; }
 
 a.bg-primary:hover, a.bg-primary:focus,
 button.bg-primary:hover,
@@ -4184,7 +4176,7 @@ button.bg-danger:focus {
   background-color: #bd2130 !important; }
 
 .bg-light {
-  background-color: #f8f9fa !important; }
+  background-color: #A6A5A1 !important; }
 
 a.bg-light:hover, a.bg-light:focus,
 button.bg-light:hover,

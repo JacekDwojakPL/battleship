@@ -8,32 +8,32 @@
     <title>Battleships: {{room}}</title>
   </head>
   <body>
-    <div class="container text-center bg-primary">
+    <div class="container text-center bg-primary pt-5 pb-5" id="room_hero">
       <h1 data-room="{{room}}" data-name="{{name}}">Battleships!</h1>
       <ul class="list-inline mt-3 mb-3 pt-3 pb-3">
-        <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="1" class="ship_type ml-3" checked="checked">Jeden<span class="inner_span1 ml-2">0</span>/4</li>
-        <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="2" class="ship_type ml-3">Dwa<span class="inner_span2 ml-2">0</span>/3</li>
-        <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="3" class="ship_type ml-3">Trzy<span class="inner_span3 ml-2">0</span>/2</li>
-        <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="4" class="ship_type ml-3">Cztery<span class="inner_span4 ml-2">0</span>/1</li>
+        <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="1" class="ship_type ml-3 mr-2" checked="checked">Jeden<span class="inner_span1 ml-2">0</span>/4</li>
+        <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="2" class="ship_type ml-3 mr-2">Dwa<span class="inner_span2 ml-2">0</span>/3</li>
+        <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="3" class="ship_type ml-3 mr-2">Trzy<span class="inner_span3 ml-2">0</span>/2</li>
+        <li class="list-inline-item pl-3 pr-3"><input type="radio" name="ship_type" data-size="4" class="ship_type ml-3 mr-2">Cztery<span class="inner_span4 ml-2">0</span>/1</li>
       </ul>
       <span class="info_span"></span>
     </div>
-    <div class="container text-center">
-      <div class="row">
+    <div class="container text-center pt-5 pb-5">
+      <div class="row pb-5">
         <div class="col-lg-6 col-12 game_div1 mt-3 mb-3"></div>
         <div class="col-lg-6 col-12 game_div2 mt-3 mb-3"></div>
       </div>
-      <div class="row pt-4 pb-4">
-        <div class="col">
+      <div class="row pt-4 pb-4 bg-light">
+        <div class="col-12 col-md-6">
           <ul class="chat_list list-unstyled ml-auto">
-            <li class=".input_field">
-              <input type="text" class="chat_input" placeholder="Message">
-              <button class="chat_button btn btn-primary">Send</button>
-            </li>
           </ul>
         </div>
+          <div class="col-12 col-md-6">
+            <input type="text" class="chat_input" placeholder="Message">
+            <button class="chat_button btn btn-primary">Send</button>
+          </div>
+        </div>
       </div>
-    </div>
 
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}" type="text/javascript"></script>

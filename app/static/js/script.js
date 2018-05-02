@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     var chat_list = document.querySelector('.chat_list');
     var new_message = document.createElement('li');
     new_message.innerHTML = data['data']['name'] + ': ' + data['data']['message']
-    chat_list.prepend(new_message);
+    chat_list.append(new_message);
     document.querySelector('.chat_input').value = "";
   });
 });
