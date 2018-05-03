@@ -25,11 +25,15 @@ var ships_global = {
 var socket = io.connect('http://' + document.domain + ':' + location.port);
 var room = document.querySelector('h1').dataset.room;
 var name = document.querySelector('h1').dataset.name;
+var ship_counter = 0;
+var sinked_ships = 0;
+var game_ready = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   var game_div1 = document.querySelector('.game_div1');
   var game_div2 = document.querySelector('.game_div2');
   var chat_button = document.querySelector('.chat_button');
+  var start_button = document.querySelector('.start_button');
 
   var player_class = "player";
   var opponent_class = "opponent";
@@ -37,9 +41,17 @@ document.addEventListener('DOMContentLoaded', () => {
   var player_board = render_game_board(game_div1, player_class);
   var opponent_board = render_game_board(game_div2, opponent_class);
 
+  var join_message = {name: name, room: room}
   // handle websocket events and responses
 
-  socket.emit('join_request', room);
+  socket.emit('join_request', join_message);
+  socket.on('join_response', function(data) {
+    var game_log = document.querySelector('.game_log');
+    var new_log_item = document.createElement('li');
+    new_log_item.setAttribute('class', 'list-item');
+    new_log_item.innerHTML = data['data']['name'] + ' entered room!';
+    game_log.prepend(new_log_item);
+  });
 
   socket.on('shoot_response', function(data) {
     var coords = {
@@ -51,20 +63,33 @@ document.addEventListener('DOMContentLoaded', () => {
     var cells = document.querySelectorAll(".player");
     cells.forEach(function(cell) {
       if(cell.dataset.x == coords.x && cell.dataset.y == coords.y) {
-        cell.style.color = 'red';
+        cell.style.background = 'red';
       }
     });
   }); // end of shoot response
 
   socket.on('hit_response', function(data) {
-    console.log(data);
     var cells = document.querySelectorAll('.opponent');
     cells.forEach(function(cell) {
       if(cell.dataset.x == data['data']['x'] && cell.dataset.y == data['data']['y']) {
         cell.classList.add('hit');
         cell.innerHTML = data['data']['size'];
-      }
-    })
+      };
+    });
+  });
+
+  // handle player ready event
+  start_button.addEventListener('click', function() {
+    var data_to_send = {name: name, room: room}
+    socket.emit('player_ready_event', data_to_send)
+  });
+
+  socket.on('player_ready_response', function(data) {
+    var game_log = document.querySelector('.game_log');
+    var new_log_item = document.createElement('li');
+    new_log_item.setAttribute('class', 'list-item');
+    new_log_item.innerHTML = data['data']['name'] + ' is ready!';
+    game_log.prepend(new_log_item);
   })
 
   // handle send and recive chat Message
@@ -78,13 +103,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }); //end of click event
 
   socket.on('chat_response', function(data) {
-    var chat_list = document.querySelector('.chat_list');
-    var new_message = document.createElement('li');
+    var chat_list = document.querySelector('.chat_container');
+    var new_message = document.createElement('div');
+    new_message.setAttribute('class', 'chat_message');
     new_message.innerHTML = data['data']['name'] + ': ' + data['data']['message']
-    chat_list.append(new_message);
+    chat_list.prepend(new_message);
     document.querySelector('.chat_input').value = "";
   });
-});
+
+  // handle game ready event
+  socket.on('game_ready_response', function(data) {
+    document.querySelector(".info_span").classList.remove("bg-danger");
+    document.querySelector(".info_span").classList.add("bg-success");
+    document.querySelector(".info_span").innerHTML = 'START!';
+    game_ready = true;
+  })
+}); // end of DOM Content Loaded event
 
 function render_game_row(i) {
   var game_row = document.createElement('div');
@@ -125,13 +159,18 @@ function render_game_cell(i, j, class_type) {
       }
     };
 
-    if(this.classList.contains('opponent')) {
+    if(this.classList.contains('opponent') && game_ready == true) {
       this.classList.add('clicked');
       coords = {x: this.dataset.x,
                 y: this.dataset.y,
                 room: room}
       socket.emit('shoot_event', coords);
-    };
+    }
+    else {
+      document.querySelector(".info_span").classList.remove("bg-success");
+      document.querySelector(".info_span").classList.add("bg-danger");
+      document.querySelector(".info_span").innerHTML = 'Game not started yet!';
+    }
 
   }) // end of click event
 
@@ -213,6 +252,10 @@ function add_ship(radio_button, ships_global, game_cell, game_board) {
         document.querySelector(".info_span").classList.remove("bg-danger");
         document.querySelector(".info_span").classList.add("bg-success");
         document.querySelector(".info_span").innerHTML = `Dodano statek o wielkosci ${radio_button.dataset.size}!`;
+        ship_counter += 1;
+        if(ship_counter == 10) {
+          document.querySelector('.start_button').removeAttribute('hidden');
+        }
       }
   }
   else {
@@ -344,7 +387,8 @@ class Ship {
           return false;
         }
       }
-      console.log("zatopiony statek o wielkosci " + this.ship_size + " numer: " + this.ship_id)
+      console.log("zatopiony statek o wielkosci " + this.ship_size + " numer: " + this.ship_id);
+      sinked_ships += 1;
       return true;
     }
 };

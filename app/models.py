@@ -8,6 +8,7 @@ class Rooms(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     players_count = db.Column(db.Integer, nullable=False)
+    players_ready = db.Column(db.Integer, nullable=False)
     full = db.Column(db.Boolean, nullable=False)
 
 class Users(db.Model):
@@ -15,4 +16,5 @@ class Users(db.Model):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     sid = db.Column(db.String, nullable=False)
+    name = db.Column(db.String, nullable=False)
     room_id = db.Column(db.Integer, db.ForeignKey("rooms.id"), nullable=False)

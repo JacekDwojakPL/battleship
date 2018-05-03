@@ -1,5 +1,28 @@
 #room_hero {
   color: #F1ECE9; }
+
+.chat_section {
+  width: inherit;
+  margin: 0 auto;
+  border: solid 1px #CCC;
+  border-radius: 5px;
+  overflow: hidden; }
+
+.chat_message {
+  border-bottom: solid 1px #333A42;
+  height: 50px;
+  padding: 20px;
+  transform: rotate(180deg);
+  direction: ltr;
+  font-size: 12px;
+  background-color: #F1ECE9; }
+
+.chat_container {
+  height: 150px;
+  overflow: auto;
+  transform: rotate(180deg);
+  direction: rtl; }
+
 .room_row {
   background-color: #A6A5A1;
   text-transform: uppercase;}
@@ -17,6 +40,7 @@
   margin-left: 1px;
   border-style: solid;
   border-width: thin;
+  border-color: #333A42;
   display: inline-block;
   padding: 1px;
   text-align: center;

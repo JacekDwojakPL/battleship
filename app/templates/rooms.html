@@ -13,7 +13,7 @@
       <h1 class="pt-5 pb-5 mt-5 mb-5">WELCOME TO BATTLESHIPS!</h1>
     </div>
     <hr>
-    <div class="container">
+    <div class="container text-center">
       <h2 class="pt-5 pb-5">Select room</h2>
       <div class="rooms_div">
       {% if rooms %}
@@ -43,18 +43,15 @@
       </div>
       </div>
       <hr>
-      <div class="container">
-        <h2 class="pt-5 pb-5">New room</h2>
+      <div class="container text-center">
+        <h2 class="pt-5 pb-5">Create new room</h2>
           <div class="row">
-            <div class="col-12 col-md-3">
+            <div class="col pr-0 text-center">
               <input type="text" name="new_room_name" placeholder="Room name" required>
-            </div>
-            <div class="col-12 col-md-9">
-              <button type="submit" class="btn btn-primary" id="room_button">Create room</button>
+              <button type="submit" class="btn btn-primary" id="room_button">Create</button>
             </div>
           </div>
-          </div>
-      </div>
+        </div>
       <hr>
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}" type="text/javascript"></script>

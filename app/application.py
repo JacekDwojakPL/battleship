@@ -24,7 +24,7 @@ def main():
 
 @app.route("/create_room", methods=['POST'])
 def create_room():
-    new_room = Rooms(name=request.form.get("room_name"), players_count=0, full=False)
+    new_room = Rooms(name=request.form.get("room_name"), players_count=0, players_ready=0, full=False)
     db.session.add(new_room)
     db.session.commit()
     return jsonify({"name": request.form.get("room_name")})
@@ -44,26 +44,36 @@ def disconnect_request():
     room = Rooms.query.get(user.room_id)
     print(room.name)
     room.players_count -= 1
+    room.players_ready -= 1
     room.full = False
     db.session.add(room)
     db.session.delete(user)
     db.session.commit()
 
 @socketio.on('join_request')
-def join_request(room):
+def join_request(message):
 
-    join_room(room)
-    room = Rooms.query.filter_by(name=room).first()
-    new_user = Users(sid=request.sid, room_id=room.id)
+    join_room(message['room'])
+    room = Rooms.query.filter_by(name=message['room']).first()
+    new_user = Users(sid=request.sid, name=message['name'], room_id=room.id)
     room.players_count += 1
     if room.players_count == 2:
         room.full = True
-
     db.session.add(new_user)
     db.session.add(room)
     db.session.commit()
-    print(f"user {request.sid} requested to join {room.name}")
+    emit('join_response', {'data': message}, broadcast=True, room=message['room'])
 
+
+@socketio.on('player_ready_event')
+def ready(message):
+    room = Rooms.query.filter_by(name=message['room']).first()
+    room.players_ready += 1
+    db.session.add(room)
+    db.session.commit()
+    if room.players_ready == 2:
+        emit('game_ready_response', room=message['room'])
+    emit('player_ready_response', {'data': message}, broadcast=True, room=message['room'])
 
 @socketio.on('shoot_event')
 def shoot(message):
