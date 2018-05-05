@@ -66,6 +66,7 @@ def join_request(message):
     db.session.add(new_user)
     db.session.add(room)
     db.session.commit()
+    print(f"user with {request.headers.get('User-Agent')} browser joined room {message['room']}")
     emit('join_response', {'data': message}, broadcast=True, room=message['room'])
 
 
@@ -90,17 +91,25 @@ def ready(message):
 
 @socketio.on('shoot_event')
 def shoot(message):
-    print(message)
+    print(f"shoot event {message}")
     room = message['room']
     emit('shoot_response', {'data': message}, broadcast=True, include_self=False, room=room)
+
+@socketio.on('hit_event')
+def hit(message):
+    print(f"hit event {message}")
+    emit('hit_response', {'data': message}, broadcast=True, include_self=False, room=message['room'])
+
+@socketio.on("sink_event")
+def ship_sink(message):
+    emit('sink_response', {'data': message}, broadcast=True, include_self=False, room=message['room'])
+
+@socketio.on('game_over_event')
+def game_over(message):
+    emit('game_over_response', {'data': message}, room=message['room'])
 
 @socketio.on('chat_event')
 def chat(message):
     print(message)
     room = message['room']
     emit('chat_response', {'data': message}, broadcast=True, room=room)
-
-@socketio.on('hit_event')
-def hit(message):
-    print(message)
-    emit('hit_response', {'data': message}, broadcast=True, include_self=False, room=message['room'])
