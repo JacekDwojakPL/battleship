@@ -25,9 +25,10 @@ var ships_global = {
 var socket = io.connect('http://' + document.domain + ':' + location.port);
 var room = document.querySelector('h1').dataset.room;
 var name = document.querySelector('h1').dataset.name;
-var ship_counter = 0;
+var cell_counter = 0;
 var sinked_ships = 0;
 var game_ready = false;
+var your_turn = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   var game_div1 = document.querySelector('.game_div1');
@@ -59,6 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   y: data['data']['y']
                 };
     hit_ship(coords, ships_global, room);
+    your_turn = true;
+    document.querySelector('.info_span').innerHTML = "Your turn!";
 
     var cells = document.querySelectorAll(".player");
     cells.forEach(function(cell) {
@@ -69,11 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }); // end of shoot response
 
   socket.on('hit_response', function(data) {
+
     var cells = document.querySelectorAll('.opponent');
     cells.forEach(function(cell) {
       if(cell.dataset.x == data['data']['x'] && cell.dataset.y == data['data']['y']) {
+        document.querySelector(".info_span").innerHTML = ""
+        document.querySelector(".info_span2").innerHTML = ""
+        document.querySelector(".info_span2").innerHTML = "Hit!"
         cell.classList.add('hit');
-        cell.innerHTML = data['data']['size'];
+        cell.innerHTML = "X";
       };
     });
   });
@@ -82,15 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
   start_button.addEventListener('click', function() {
     var data_to_send = {name: name, room: room}
     socket.emit('player_ready_event', data_to_send)
+    this.setAttribute('hidden', true);
   });
 
   socket.on('player_ready_response', function(data) {
-    var game_log = document.querySelector('.game_log');
-    var new_log_item = document.createElement('li');
-    new_log_item.setAttribute('class', 'list-item');
-    new_log_item.innerHTML = data['data']['name'] + ' is ready!';
-    game_log.prepend(new_log_item);
-  })
+    your_turn = true;
+    document.querySelector(".info_span2").innerHTML = "You will shoot first!";
+  });
 
   // handle send and recive chat Message
   chat_button.addEventListener('click', function() {
@@ -115,8 +120,15 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.on('game_ready_response', function(data) {
     document.querySelector(".info_span").classList.remove("bg-danger");
     document.querySelector(".info_span").classList.add("bg-success");
-    document.querySelector(".info_span").innerHTML = 'START!';
+    document.querySelector(".info_span").innerHTML = 'GAME START!';
+
     game_ready = true;
+    if(your_turn == true) {
+      document.querySelector('.info_span2').innerHTML = "Your turn!";
+    }
+    else {
+      document.querySelector('.info_span2').innerHTML = "Wait for your turn!";
+    }
   })
 }); // end of DOM Content Loaded event
 
@@ -159,18 +171,17 @@ function render_game_cell(i, j, class_type) {
       }
     };
 
-    if(this.classList.contains('opponent') && game_ready == true) {
+    if(this.classList.contains('opponent') && (your_turn == true && game_ready == true)) {
       this.classList.add('clicked');
       coords = {x: this.dataset.x,
                 y: this.dataset.y,
                 room: room}
+      your_turn = false;
+      document.querySelector('.info_span').innerHTML = "Wait for your turn!";
       socket.emit('shoot_event', coords);
-    }
-    else {
-      document.querySelector(".info_span").classList.remove("bg-success");
-      document.querySelector(".info_span").classList.add("bg-danger");
-      document.querySelector(".info_span").innerHTML = 'Game not started yet!';
-    }
+      document.querySelector('.info_span2').innerHTML = "";
+      document.querySelector('.info_span2').innerHTML = "Miss!";
+    };
 
   }) // end of click event
 
@@ -252,10 +263,7 @@ function add_ship(radio_button, ships_global, game_cell, game_board) {
         document.querySelector(".info_span").classList.remove("bg-danger");
         document.querySelector(".info_span").classList.add("bg-success");
         document.querySelector(".info_span").innerHTML = `Dodano statek o wielkosci ${radio_button.dataset.size}!`;
-        ship_counter += 1;
-        if(ship_counter == 10) {
-          document.querySelector('.start_button').removeAttribute('hidden');
-        }
+        cell_counter += 1;
       }
   }
   else {
@@ -267,6 +275,10 @@ function add_ship(radio_button, ships_global, game_cell, game_board) {
 
               game_cell.classList.add("ship");
               game_cell.innerHTML = radio_button.dataset.size;
+              cell_counter += 1;
+              if(cell_counter == 20) {
+                document.querySelector('.start_button').removeAttribute('hidden');
+              }
         };
 
       };
@@ -295,6 +307,7 @@ class Ship {
   constructor(ship_size, ship_id) {
     this.ship_id = ship_id;
     this.ship_size = ship_size;
+    this.sinked = false;
     this.coords = [];
     this.last_coord_1 = 0;
     this.last_coord_2 = 0;
@@ -302,6 +315,7 @@ class Ship {
     this.next_coord_1b = 0;
     this.next_coord_2a = 0;
     this.next_coord_2b = 0;
+    this.coords_hit = 0;
     for(let i = 0; i < this.ship_size; i++) {
       this.coords[i] = {exist: false};
     };
@@ -370,25 +384,25 @@ class Ship {
     };
 
     hit(coords, room) {
-      for(var i = 0; i < this.coords.length; i++) {
-        if(this.coords[i].coord_1 == coords.x && this.coords[i].coord_2 == coords.y) {
-          this.coords[i].hit = true;
-          console.log("trafiony statek o wielkosci " + this.ship_size + " numer: " + this.ship_id)
-          var message = {x: coords.x, y: coords.y, size: this.ship_size, room: room}
-          socket.emit('hit_event', message)
-        }
-      }
-      this.is_sinked();
-    }
+      if(this.sinked == false) {
 
-    is_sinked() {
-      for(var i = 0; i < this.coords.length; i++) {
-        if(this.coords[i].hit == false) {
-          return false;
+        for(var i = 0; i < this.coords.length; i++) {
+          if(this.coords[i].coord_1 == coords.x && this.coords[i].coord_2 == coords.y) {
+            this.coords[i].hit = true;
+            this.coords_hit += 1;
+            console.log("Twoj statek o wielkosci " + this.ship_size + " numer: " + this.ship_id + " zostal trafiony!");
+
+            var message = {x: coords.x, y: coords.y, size: this.ship_size, room: room, name: name}
+            socket.emit('hit_event', message)
+
+            if(this.coords_hit == this.ship_size) {
+              this.sinked = true;
+              sinked_ships += 1;
+              console.log("Twoj statek o wielkosci " + this.ship_size + " numer: " + this.ship_id + " zostal zatopiony!");
+              console.log("Ilosc twoich zatopionych statkow: " + sinked_ships + "/10!");
+          }
         }
       }
-      console.log("zatopiony statek o wielkosci " + this.ship_size + " numer: " + this.ship_id);
-      sinked_ships += 1;
-      return true;
     }
+  }
 };

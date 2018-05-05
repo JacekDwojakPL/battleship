@@ -45,6 +45,10 @@ def disconnect_request():
     print(room.name)
     room.players_count -= 1
     room.players_ready -= 1
+    if room.players_ready < 0:
+        room.players_ready = 0
+    if room.players_count < 0:
+        room.players_count = 0;
     room.full = False
     db.session.add(room)
     db.session.delete(user)
@@ -69,11 +73,20 @@ def join_request(message):
 def ready(message):
     room = Rooms.query.filter_by(name=message['room']).first()
     room.players_ready += 1
-    db.session.add(room)
-    db.session.commit()
+
+    if room.players_ready == 1:
+        db.session.add(room)
+        db.session.commit()
+        print(f"player {request.sid} is ready and will shoot first!")
+        emit("player_ready_response", {"data": message}, room=request.sid)
+
     if room.players_ready == 2:
-        emit('game_ready_response', room=message['room'])
-    emit('player_ready_response', {'data': message}, broadcast=True, room=message['room'])
+        print(f"game is ready!")
+        db.session.add(room)
+        db.session.commit()
+        emit("game_ready_response", room=message["room"])
+
+
 
 @socketio.on('shoot_event')
 def shoot(message):
