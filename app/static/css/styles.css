@@ -1,6 +1,15 @@
 #room_hero {
   color: #F1ECE9; }
 
+#chat_info_div {
+  border-radius: 5px; }
+
+.ship_list_item {
+display: inline;
+ list-style-type: none;
+ padding-right: 20px;
+ float: left;
+}
 .chat_section {
   width: inherit;
   margin: 0 auto;
@@ -40,11 +49,13 @@
 }
 
 .room_row {
-  background-color: #A6A5A1;
+  border: solid 1px #323D4F;
+  border-radius: 5px;
+  background-color: #C8CEC2;
   text-transform: uppercase; }
 
 .ship {
-  background-color: #8D2F57; }
+  background-color: #5DB5A4; }
 
 .game_row {
   height: 35px;
@@ -56,7 +67,8 @@
   margin-left: 1px;
   border-style: solid;
   border-width: thin;
-  border-color: #333A42;
+  border-color: #323D4F;
+  color: #323D4F;
   display: inline-block;
   padding: 1px;
   text-align: center;
@@ -65,11 +77,11 @@
 
   @media (max-width: 360px) {
     .game_row {
-      height: 30px; }
+      height: 25px; }
 
     .game_cell {
-      width: 30px;
-      height: 30px;
+      width: 25px;
+      height: 25px;
       margin-left: 1px;
       border-style: solid;
       border-width: thin;
@@ -111,7 +123,7 @@
   --white: #fff;
   --gray: #6c757d;
   --gray-dark: #343a40;
-  --primary: #D7443F;
+  --primary: #A02534;
   --secondary: #6c757d;
   --success: #28a745;
   --info: #17a2b8;
@@ -154,7 +166,7 @@ body {
   line-height: 1.5;
   color: #333A42;
   text-align: left;
-  background-color: #F1ECE9; }
+  background-color: #E2C3C9; }
 
 [tabindex="-1"]:focus {
   outline: 0 !important; }
@@ -230,12 +242,12 @@ sup {
   top: -.5em; }
 
 a {
-  color: #D7443F;
+  color: #A02534;
   text-decoration: none;
   background-color: transparent;
   -webkit-text-decoration-skip: objects; }
   a:hover {
-    color: #F1ECE9;
+    color: #323D4F;
     text-decoration: underline; }
 
 a:not([href]):not([tabindex]) {
@@ -328,7 +340,8 @@ button::-moz-focus-inner,
 input[type="radio"],
 input[type="checkbox"] {
   box-sizing: border-box;
-  padding: 0; }
+  padding: 10px;
+  margin: 10px; }
 
 input[type="date"],
 input[type="time"],
@@ -1726,12 +1739,12 @@ fieldset:disabled a.btn {
 
 .btn-primary {
   color: #F1ECE9;
-  background-color: #D7443F;
-  border-color: #333A42; }
+  background-color: #A02534;
+  border-color: #C8CEC2; }
   .btn-primary:hover {
-    color: #333A42;
-    background-color: #F1ECE9;
-    border-color: #D7443F; }
+    color: #A02534;
+    background-color: #C8CEC2;
+    border-color: #A02534; }
   .btn-primary:focus, .btn-primary.focus {
     box-shadow: 0 0 0 0.2rem rgba(149, 188, 167, 0.5); }
   .btn-primary.disabled, .btn-primary:disabled {
@@ -4190,7 +4203,7 @@ button.close {
   vertical-align: text-top !important; }
 
 .bg-primary {
-  background-color: #D7443F !important; }
+  background-color: #A02534 !important; }
 
 a.bg-primary:hover, a.bg-primary:focus,
 button.bg-primary:hover,

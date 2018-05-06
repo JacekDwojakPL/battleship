@@ -9,50 +9,52 @@
     <title>Battleships</title>
   </head>
   <body>
-    <div class="container text-center">
-      <h1 class="pt-5 pb-5 mt-5 mb-5">WELCOME TO BATTLESHIPS!</h1>
-    </div>
-    <hr>
-    <div class="container text-center">
-      <h2 class="pt-5 pb-5">Select room</h2>
-      <div class="rooms_div">
-      {% if rooms %}
-        {% for room in rooms %}
-        <div class="row room_row text-center mt-2 mb-2">
-          <div class="col-12 col-md-2 pt-3 pb-3">
-            <a href="#{{room.name}}">{{room.name}}</a>
-          </div>
-          <div class="col-12 col-md-2 pt-3 pb-3">
-            <span class="players_count">Players: {{room.players_count}}/2</span>
-          </div>
-          <div class="col-12 col-md-8 pt-3 pb-3">
-            {% if room.full %}
-            <span class="room_info bg-danger">Room is full!</span>
-            {% else %}
-            <form action="{{ url_for('game', room=room.name) }}" method="POST">
-                <input type="text" name="player_name" placeholder="Your name" required>
-                <button class="btn btn-primary" type="submit">Enter</button>
-            </form>
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-        {% else %}
-        <p class="empty_room_info">No rooms yet! Create new one below!</p>
-        {% endif %}
-      </div>
+    <div class="container-fluid pb-5" id="rooms_main_div">
+      <div class="container text-center">
+        <h1 class="pt-5 pb-5 mt-5 mb-5">WELCOME TO BATTLESHIPS!</h1>
       </div>
       <hr>
       <div class="container text-center">
-        <h2 class="pt-5 pb-5">Create new room</h2>
-          <div class="row">
-            <div class="col pr-0 text-center">
-              <input type="text" name="new_room_name" placeholder="Room name" required>
-              <button type="submit" class="btn btn-primary" id="room_button">Create</button>
+        <h2 class="pt-5 pb-5 pb-sm-1">Join room</h2>
+        <div class="container rooms_div">
+          {% if rooms %}
+          {% for room in rooms %}
+          <div class="row room_row text-center mt-2 mb-2">
+            <div class="col-12 col-md-2 pt-3 pb-3">
+              <a href="#{{room.name}}">{{room.name}}</a>
             </div>
+            <div class="col-12 col-md-2 pt-3 pb-3">
+              <span class="players_count">Players: {{room.players_count}}/2</span>
+            </div>
+            <div class="col-12 col-md-8 pt-3 pb-3">
+              {% if room.full %}
+              <span class="room_info bg-danger">Room is full!</span>
+              {% else %}
+              <form action="{{ url_for('game', room=room.name) }}" method="POST">
+                  <input type="text" name="player_name" placeholder="Your name" required>
+                  <button class="btn btn-primary" type="submit">Enter</button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="empty_room_info">No rooms yet! Create new one below!</p>
+            {% endif %}
           </div>
         </div>
-      <hr>
+        <hr>
+        <div class="container text-center">
+          <h2 class="pt-5 pb-5">Create new room</h2>
+            <div class="row">
+              <div class="col pr-0 text-center">
+                <input type="text" name="new_room_name" placeholder="Room name" required>
+                <button type="submit" class="btn btn-primary" id="room_button">Create</button>
+              </div>
+            </div>
+          </div>
+          <hr>
+        </div>
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}" type="text/javascript"></script>
