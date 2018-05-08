@@ -19,12 +19,21 @@ display: inline;
 
 .chat_message {
   border-bottom: solid 1px #333A42;
+  border-radius: 2px;
   height: 50px;
   padding: 20px;
   transform: rotate(180deg);
   direction: ltr;
-  font-size: 12px;
-  background-color: #F1ECE9; }
+  font-size: 12px; }
+
+.sent {
+  text-align: right;
+  background-color: #C4D7ED;
+}
+
+.answer {
+  background-color: #ABC8E2;
+}
 
 .chat_container {
   height: 150px;

@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cells.forEach(function(cell) {
       if(cell.dataset.x == coords.x && cell.dataset.y == coords.y) {
         cell.style.background = 'red';
+        cell.innerHTML = "X";
       }
     });
   });
@@ -110,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     var new_log_item = document.createElement('li');
     var date = new Date();
     new_log_item.setAttribute('class', 'list-item');
+    new_log_item.style.color = "green";
     new_log_item.innerHTML = "(" + date.getHours() + ":" +date.getMinutes() + ":" + date.getSeconds() + "): You sank " + data['data']['name'] + '\'s ship!';
     game_log.prepend(new_log_item);
   });
@@ -134,6 +136,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: name,
                     room, room
                   };
+    var chat_list = document.querySelector('.chat_container');
+    var new_message = document.createElement('div');
+    new_message.setAttribute('class', 'chat_message sent');
+    new_message.innerHTML = name + ": " + data_to_send.message;
+    chat_list.prepend(new_message);
+    document.querySelector('.chat_input').value = "";
 
     socket.emit('chat_event', data_to_send);
   });
@@ -141,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.on('chat_response', function(data) {
     var chat_list = document.querySelector('.chat_container');
     var new_message = document.createElement('div');
-    new_message.setAttribute('class', 'chat_message');
+    new_message.setAttribute('class', 'chat_message answer');
     new_message.innerHTML = data['data']['name'] + ': ' + data['data']['message']
     chat_list.prepend(new_message);
     document.querySelector('.chat_input').value = "";
@@ -165,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.on("game_over_response", function(data) {
     document.querySelector(".info_span2").innerHTML = ""
     document.querySelector(".info_span").innerHTML = ""
-    document.querySelector(".info_span").innerHTML = `Game over! ${data['data']['name']} lost!`;
+    document.querySelector(".info_span").innerHTML = `Game over! You won!`;
     game_ready = false;
   });
   /*** END OF GAME OVER EVENT AND RESPONSE HANDLER ***/
@@ -197,11 +205,11 @@ function render_game_cell(i, j, class_type) {
         add_ship(radio_button, ships_global, this, game_board);
       }
       else {
-        document.querySelector(".info_span").innerHTML = 'Nie mozesz dodac statku w tym miejscu!';
+        document.querySelector(".info_span").innerHTML = 'You can\'t add ship here!';
       }
     };
 
-    if(this.classList.contains('opponent') && (your_turn == true && game_ready == true)) {
+    if((this.classList.contains('opponent') && !(this.classList.contains('clicked'))) && (your_turn == true && game_ready == true)) {
 
       this.classList.add('clicked');
       coords = {x: this.dataset.x,
@@ -273,7 +281,7 @@ function add_ship(radio_button, ships_global, game_cell, game_board) {
   if(last_ship == null || last_ship.is_created() == true) {
 
       if(ships_obj.ships_quantity >= ships_obj.ships_amount) {
-          document.querySelector(".info_span").innerHTML = "juz jest wystarczajaco duzo statkow tego typu!";
+          document.querySelector(".info_span").innerHTML = "You have enough ships of this type!";
       }
       else {
 
@@ -290,7 +298,7 @@ function add_ship(radio_button, ships_global, game_cell, game_board) {
         game_cell.innerHTML = radio_button.dataset.size;
 
         document.querySelector(`.inner_span${radio_button.dataset.size}`).innerHTML = ship_id;
-        document.querySelector(".info_span").innerHTML = `Dodano statek o wielkosci ${radio_button.dataset.size}!`;
+        document.querySelector(".info_span").innerHTML = `Added new ship of size ${radio_button.dataset.size}!`;
         cell_counter += 1;
       }
   }
@@ -304,6 +312,7 @@ function add_ship(radio_button, ships_global, game_cell, game_board) {
               game_cell.classList.add("ship");
               game_cell.innerHTML = radio_button.dataset.size;
               cell_counter += 1;
+
               if(cell_counter == 20) {
                 document.querySelector('.start_button').removeAttribute('hidden');
               }
@@ -337,12 +346,12 @@ class Ship {
     this.ship_size = ship_size;
     this.sinked = false;
     this.coords = [];
-    this.last_coord_1 = 0;
-    this.last_coord_2 = 0;
-    this.next_coord_1a = 0;
-    this.next_coord_1b = 0;
-    this.next_coord_2a = 0;
-    this.next_coord_2b = 0;
+    this.last_coord_x = 0;
+    this.last_coord_y = 0;
+    this.next_coord_x_up = 0;
+    this.next_coord_x_down = 0;
+    this.next_coord_y_left = 0;
+    this.next_coord_y_right = 0;
     this.coords_hit = 0;
     for(let i = 0; i < this.ship_size; i++) {
       this.coords[i] = {exist: false};
@@ -362,6 +371,7 @@ class Ship {
 
   save_coords(x, y) {
     if(this.is_created() == false) {
+
       for(let i = 0; i < this.ship_size; i++) {
           if(this.coords[i].exist == false) {
 
@@ -371,12 +381,12 @@ class Ship {
                               coord_2: y,
                               hit: false
                             };
-                this.last_coord_upDown = x;
-                this.last_coord_leftRight = y;
-                this.next_coord_1_up = parseInt(x) - 1;
-                this.next_coord_1_down = parseInt(x) + 1;
-                this.next_coord_2_left = parseInt(y) - 1;
-                this.next_coord_2_right = parseInt(y) + 1;
+                this.last_coord_x = x;
+                this.last_coord_y = y;
+                this.next_coord_x_up = parseInt(x) - 1;
+                this.next_coord_x_down = parseInt(x) + 1;
+                this.next_coord_y_left = parseInt(y) - 1;
+                this.next_coord_y_right = parseInt(y) + 1;
                 break;
           };
         };
@@ -388,13 +398,17 @@ class Ship {
     }; // end of save coords method
 
     check_coords(x, y) {
-      if((x == this.next_coord_1_up) && (y == this.last_coord_leftRight) || (x == this.next_coord_1_down) && (y == this.last_coord_leftRight)) {
+            console.log("check coords active")
+      if((x == this.next_coord_x_up) && (y == this.last_coord_y) || (x == this.next_coord_x_down) && (y == this.last_coord_y)) {
+        console.log("check coords returned true")
         return true;
       }
-      if((y == this.next_coord_2_left) && (x == this.last_coord_upDown) || (y == this.next_coord_2_right) && (x == this.last_coord_upDown)) {
+      if((y == this.next_coord_y_left) && (x == this.last_coord_x) || (y == this.next_coord_y_right) && (x == this.last_coord_x)) {
+        console.log("check coords returned true")
         return true;
       }
 
+      console.log("check coords returned false")
       return false;
     } // end of check coords method
 
@@ -430,6 +444,7 @@ class Ship {
             var new_log_item = document.createElement('li');
             var date = new Date();
             new_log_item.setAttribute('class', 'list-item');
+            new_log_item.style.color = "orange";
             new_log_item.innerHTML = "(" + date.getHours() + ":" +date.getMinutes() + ":" + date.getSeconds() + "): Your ship was hit!";
             game_log.prepend(new_log_item);
 
@@ -442,6 +457,7 @@ class Ship {
               var new_log_item = document.createElement('li');
               var date = new Date();
               new_log_item.setAttribute('class', 'list-item');
+              new_log_item.style.color = "red";
               new_log_item.innerHTML = "(" + date.getHours() + ":" +date.getMinutes() + ":" + date.getSeconds() + "): Your ship sanked!";
               game_log.prepend(new_log_item);
 
@@ -451,6 +467,9 @@ class Ship {
               if(sinked_ships == 10) {
                 var message = {name: name, room: room}
                 socket.emit("game_over_event", message);
+                document.querySelector(".info_span").innerHTML = "";
+                document.querySelector(".info_span").innerHTML = "YOU LOST!!!";
+                game_ready = false;
               }
             }
           return true;
