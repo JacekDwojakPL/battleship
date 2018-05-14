@@ -24,10 +24,11 @@ def main():
 
 @app.route("/create_room", methods=['POST'])
 def create_room():
-    new_room = Rooms(name=request.form.get("room_name"), players_count=0, players_ready=0, full=False)
-    db.session.add(new_room)
-    db.session.commit()
-    return jsonify({"name": request.form.get("room_name")})
+    if Rooms.query.count() < 20:
+        new_room = Rooms(name=request.form.get("room_name"), players_count=0, players_ready=0, full=False)
+        db.session.add(new_room)
+        db.session.commit()
+        return jsonify({"name": request.form.get("room_name")})
 
 @app.route("/game/<room>", methods=['GET','POST'])
 def game(room):
