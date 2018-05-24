@@ -479,13 +479,6 @@ class Ship {
               var message = {name: name, room: room}
               socket.emit("sink_event", message)
 
-              /*if(sinked_ships == 10) {
-                game_ready = false;
-                document.querySelector(".info_span").innerHTML = "";
-                document.querySelector(".info_span").innerHTML = "YOU LOST!!!";
-                var message = {name: name, room: room}
-                socket.emit("game_over_event", message);
-              }*/
             }
           return true;
         }
