@@ -63,19 +63,29 @@ document.addEventListener('DOMContentLoaded', () => {
                   x: data['data']['x'],
                   y: data['data']['y']
                 };
-    hit_ship(coords, ships_global, room);
-    your_turn = true;
-    document.querySelector(".info_span").innerHTML = ""
-    document.querySelector(".info_span2").innerHTML = ""
-    document.querySelector('.info_span').innerHTML = "Your turn!";
-
     var cells = document.querySelectorAll(".player");
     cells.forEach(function(cell) {
       if(cell.dataset.x == coords.x && cell.dataset.y == coords.y) {
-        cell.style.background = 'red';
+        cell.style.background = 'orange';
         cell.innerHTML = "X";
-      }
+          };
     });
+    hit_ship(coords, ships_global, room);
+
+    if(sinked_ships == 10) {
+      game_ready = false;
+      document.querySelector(".info_span").innerHTML = "";
+      document.querySelector(".info_span").innerHTML = "YOU LOST!!!";
+      var message = {name: name, room: room}
+      socket.emit("game_over_event", message);
+    }
+    else {
+      your_turn = true;
+      document.querySelector(".info_span").innerHTML = ""
+      document.querySelector(".info_span2").innerHTML = ""
+      document.querySelector('.info_span').innerHTML = "Your turn!";
+
+      }
   });
   /*** END OF SHOOT RESPONSE HANDLER ***/
 
@@ -86,9 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
       var cells = document.querySelectorAll('.opponent');
       cells.forEach(function(cell) {
         if(cell.dataset.x == data['data']['x'] && cell.dataset.y == data['data']['y']) {
-          document.querySelector(".info_span").innerHTML = ""
-          document.querySelector(".info_span2").innerHTML = ""
-          document.querySelector(".info_span2").innerHTML = "Hit!"
           cell.classList.add('hit');
           cell.innerHTML = "X";
 
@@ -171,10 +178,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /*** HANDLE GAME OVER EVENT AND RESPONSE ***/
   socket.on("game_over_response", function(data) {
+    game_ready = false;
     document.querySelector(".info_span2").innerHTML = ""
     document.querySelector(".info_span").innerHTML = ""
     document.querySelector(".info_span").innerHTML = `Game over! You won!`;
-    game_ready = false;
   });
   /*** END OF GAME OVER EVENT AND RESPONSE HANDLER ***/
 
@@ -398,7 +405,7 @@ class Ship {
     }; // end of save coords method
 
     check_coords(x, y) {
-            console.log("check coords active")
+      console.log("check coords active")
       if((x == this.next_coord_x_up) && (y == this.last_coord_y) || (x == this.next_coord_x_down) && (y == this.last_coord_y)) {
         console.log("check coords returned true")
         return true;
@@ -440,6 +447,14 @@ class Ship {
             var message = {x: this.coords[i].coord_1, y: this.coords[i].coord_2, room: room, name: name, hit: true}
             socket.emit('hit_event', message);
 
+            var cells = document.querySelectorAll('.player');
+            cells.forEach(function(cell) {
+              if(cell.dataset.x == coords.x && cell.dataset.y == coords.y) {
+                cell.style.background = 'red';
+              }
+            });
+
+            //game log handle
             var game_log = document.querySelector('.game_log');
             var new_log_item = document.createElement('li');
             var date = new Date();
@@ -464,13 +479,13 @@ class Ship {
               var message = {name: name, room: room}
               socket.emit("sink_event", message)
 
-              if(sinked_ships == 10) {
-                var message = {name: name, room: room}
-                socket.emit("game_over_event", message);
+              /*if(sinked_ships == 10) {
+                game_ready = false;
                 document.querySelector(".info_span").innerHTML = "";
                 document.querySelector(".info_span").innerHTML = "YOU LOST!!!";
-                game_ready = false;
-              }
+                var message = {name: name, room: room}
+                socket.emit("game_over_event", message);
+              }*/
             }
           return true;
         }
