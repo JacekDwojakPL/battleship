@@ -22,7 +22,8 @@ var ships_global = {
       }
   };
 
-var socket = io.connect('http://' + document.domain + ':' + location.port);
+var socket = io.connect(location.protocol + "//" + location.host);
+console.log(location.protocol + "//" + location.host);
 var room = document.querySelector('h1').dataset.room;
 var name = document.querySelector('h1').dataset.name;
 var cell_counter = 0;
@@ -30,7 +31,7 @@ var sinked_ships = 0;
 var game_ready = false;
 var your_turn = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   var game_div1 = document.querySelector('.game_div1');
   var game_div2 = document.querySelector('.game_div2');
   var chat_button = document.querySelector('.chat_button');
