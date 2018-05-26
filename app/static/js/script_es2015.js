@@ -209,7 +209,7 @@ function render_game_cell(i, j, class_type) {
   game_cell.innerHTML = "0";
 
   //handle click event, send coordination data to server
-  game_cell.addEventListener('click', function () {
+  game_cell.onclick = function() {
     if (this.classList.contains('player')) {
 
       var radio_button = document.querySelector('input[name=ship_type]:checked');
@@ -234,7 +234,7 @@ function render_game_cell(i, j, class_type) {
 
       socket.emit('shoot_event', coords);
     };
-  }); // end of click event
+  }; // end of click event
 
   return game_cell;
 };
