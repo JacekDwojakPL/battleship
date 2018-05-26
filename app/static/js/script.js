@@ -23,7 +23,6 @@ var ships_global = {
   };
 
 var socket = io.connect(location.protocol + "//" + location.host);
-console.log(location.protocol + "//" + location.host);
 var room = document.querySelector('h1').dataset.room;
 var name = document.querySelector('h1').dataset.name;
 var cell_counter = 0;
@@ -31,7 +30,7 @@ var sinked_ships = 0;
 var game_ready = false;
 var your_turn = false;
 
-document.addEventListener('DOMContentLoaded', function() {
+window.onload = function() {
   var game_div1 = document.querySelector('.game_div1');
   var game_div2 = document.querySelector('.game_div2');
   var chat_button = document.querySelector('.chat_button');
@@ -142,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
   chat_button.addEventListener('click', function() {
     var data_to_send = { message: document.querySelector('.chat_input').value,
                     name: name,
-                    room, room
+                    room: room
                   };
     var chat_list = document.querySelector('.chat_container');
     var new_message = document.createElement('div');
@@ -186,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   /*** END OF GAME OVER EVENT AND RESPONSE HANDLER ***/
 
-});
+};
 /*** END OF DOM CONTENT LOADED EVENT ***/
 
 function render_game_row(i) {
@@ -220,7 +219,7 @@ function render_game_cell(i, j, class_type) {
     if((this.classList.contains('opponent') && !(this.classList.contains('clicked'))) && (your_turn == true && game_ready == true)) {
 
       this.classList.add('clicked');
-      coords = {x: this.dataset.x,
+      var coords = {x: this.dataset.x,
                 y: this.dataset.y,
                 room: room}
       your_turn = false;

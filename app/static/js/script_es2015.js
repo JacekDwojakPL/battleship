@@ -224,7 +224,7 @@ function render_game_cell(i, j, class_type) {
     if (this.classList.contains('opponent') && !this.classList.contains('clicked') && your_turn == true && game_ready == true) {
 
       this.classList.add('clicked');
-      coords = { x: this.dataset.x,
+      var coords = { x: this.dataset.x,
         y: this.dataset.y,
         room: room };
       your_turn = false;
