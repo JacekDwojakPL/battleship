@@ -59,7 +59,6 @@ window.onload = function () {
     var date = new Date();
     new_log_item.setAttribute('class', 'list-item');
     new_log_item.innerHTML = "(" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "): " + data['data']['name'] + ' entered room!';
-    //game_log.prepend(new_log_item);
     game_log.insertBefore(new_log_item, game_log.firstChild)
   });
   /*** END OF JOIN ROOM EVENT AND RESPONSE HANDLER ***/
@@ -70,13 +69,14 @@ window.onload = function () {
       x: data['data']['x'],
       y: data['data']['y']
     };
-    var cells = document.querySelectorAll(".player");
-    cells.forEach(function (cell) {
-      if (cell.dataset.x == coords.x && cell.dataset.y == coords.y) {
-        cell.style.background = 'orange';
-        cell.innerHTML = "X";
+    var cells = document.querySelectorAll("[data-player='player']");
+    for(var i = 0; i < cells.length; i++) {
+      if (cells[i].dataset.x == coords.x && cells[i].dataset.y == coords.y) {
+        cells[i].style.background = 'orange';
+        cells[i].innerHTML = "X";
       };
-    });
+    };
+
     hit_ship(coords, ships_global, room);
 
     if (sinked_ships == 10) {
@@ -98,11 +98,13 @@ window.onload = function () {
   socket.on('hit_response', function (data) {
 
     if (data['data']['hit'] == true) {
-      var cells = document.querySelectorAll('.opponent');
-      cells.forEach(function (cell) {
-        if (cell.dataset.x == data['data']['x'] && cell.dataset.y == data['data']['y']) {
-          cell.classList.add('hit');
-          cell.innerHTML = "X";
+      var cells = document.querySelectorAll("[data-player='opponent']");
+        for(var i = 0; i < cells.length; i++) {
+          if (cells[i].dataset.x == data['data']['x'] && cells[i].dataset.y == data['data']['y']) {
+            cells[i].style.background = 'yellow';
+            cells[i].innerHTML = "X";
+          }
+        }
 
           // add info to game log window
           var game_log = document.querySelector('.game_log');
@@ -110,12 +112,12 @@ window.onload = function () {
           var date = new Date();
           new_log_item.setAttribute('class', 'list-item');
           new_log_item.innerHTML = "(" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "): You shot " + data['data']['name'] + '\'s ship!';
-          //game_log.prepend(new_log_item);
+
           game_log.insertBefore(new_log_item, game_log.firstChild)
         };
       });
-    }
-  });
+    //}
+  //});
   /*** END OF SHIP HIT RESPONSE HANDLER ***/
 
   /*** HANDLE SHIP SINK RESPONSE ***/
@@ -126,7 +128,8 @@ window.onload = function () {
     new_log_item.setAttribute('class', 'list-item');
     new_log_item.style.color = "green";
     new_log_item.innerHTML = "(" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "): You sank " + data['data']['name'] + '\'s ship!';
-    game_log.prepend(new_log_item);
+    game_log.insertBefore(new_log_item, game_log.firstChild)
+
   });
   /*** END OF SHIP SINK REPOSNE HANDLER ***/
 
@@ -153,7 +156,6 @@ window.onload = function () {
     var new_message = document.createElement('div');
     new_message.setAttribute('class', 'chat_message sent');
     new_message.innerHTML = name + ": " + data_to_send.message;
-    //chat_list.prepend(new_message);
     chat_list.insertBefore(new_message, chat_list.firstChild)
     document.querySelector('.chat_input').value = "";
 
@@ -166,7 +168,6 @@ window.onload = function () {
     new_message.setAttribute('class', 'chat_message answer');
     new_message.innerHTML = data['data']['name'] + ': ' + data['data']['message'];
     chat_list.insertBefore(new_message, chat_list.firstChild)
-    //chat_list.prepend(new_message);
     document.querySelector('.chat_input').value = "";
   });
   /*** END OF CHAT EVENT AND RESPONSE HANDLER ***/
@@ -206,11 +207,13 @@ function render_game_cell(i, j, class_type) {
   game_cell.classList.add('game_cell', class_type);
   game_cell.setAttribute('data-x', i);
   game_cell.setAttribute('data-y', j);
+  game_cell.setAttribute('data-player', class_type);
   game_cell.innerHTML = "0";
 
   //handle click event, send coordination data to server
-  game_cell.onclick = function() {
-    if (this.classList.contains('player')) {
+  game_cell.addEventListener('click',  function() {
+
+    if (this.dataset.player == 'player') {
 
       var radio_button = document.querySelector('input[name=ship_type]:checked');
 
@@ -219,11 +222,11 @@ function render_game_cell(i, j, class_type) {
       } else {
         document.querySelector(".info_span").innerHTML = 'You can\'t add ship here!';
       }
-    };
-
-    if (this.classList.contains('opponent') && !this.classList.contains('clicked') && your_turn == true && game_ready == true) {
-
-      this.classList.add('clicked');
+    }
+    else if (this.dataset.player == 'opponent' && !this.dataset.clicked && your_turn == true && game_ready == true) {
+      console.log("oponent cell clicked")
+      this.setAttribute('clicked', true);
+      this.style.background = 'springgreen';
       var coords = { x: this.dataset.x,
         y: this.dataset.y,
         room: room };
@@ -234,7 +237,7 @@ function render_game_cell(i, j, class_type) {
 
       socket.emit('shoot_event', coords);
     };
-  }; // end of click event
+  }); // end of click event
 
   return game_cell;
 };
@@ -461,12 +464,13 @@ var Ship = function () {
             var message = { x: this.coords[i].coord_1, y: this.coords[i].coord_2, room: room, name: name, hit: true };
             socket.emit('hit_event', message);
 
-            var cells = document.querySelectorAll('.player');
-            cells.forEach(function (cell) {
-              if (cell.dataset.x == coords.x && cell.dataset.y == coords.y) {
-                cell.style.background = 'red';
+            var cells = document.querySelectorAll("[data-player='player']");
+
+            for(var i = 0; i < cells.length; i++) {
+              if (cells[i].dataset.x == coords.x && cells[i].dataset.y == coords.y) {
+                cells[i].style.background = 'red';
               }
-            });
+            }
 
             //game log handle
             var game_log = document.querySelector('.game_log');
@@ -475,7 +479,8 @@ var Ship = function () {
             new_log_item.setAttribute('class', 'list-item');
             new_log_item.style.color = "orange";
             new_log_item.innerHTML = "(" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "): Your ship was hit!";
-            game_log.prepend(new_log_item);
+            game_log.insertBefore(new_log_item, game_log.firstChild)
+
 
             // handle sink event
             if (this.coords_hit == this.ship_size) {
@@ -488,7 +493,7 @@ var Ship = function () {
               new_log_item.setAttribute('class', 'list-item');
               new_log_item.style.color = "red";
               new_log_item.innerHTML = "(" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "): Your ship sanked!";
-              game_log.prepend(new_log_item);
+              game_log.insertBefore(new_log_item, game_log.firstChild)
 
               var message = { name: name, room: room };
               socket.emit("sink_event", message);
